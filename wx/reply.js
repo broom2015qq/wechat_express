@@ -73,10 +73,20 @@ exports.reply = function* (next){
 	}
 	//用户发的text
 	else if (message.MsgType==='text') {
-		var content = message.Content;
-		var reply = message.Content+'是啥意思?';
-		if (content==='1') {
-			reply = '第一项';
+		if(content === '1'){
+			var user = yield wechatApi.fetchUsers(message.FromUserName,'zh-CN');
+			//console.log('******user**********');
+			//console.log(user);
+			var openIds = [
+				{
+					openid:message.FromUserName,
+					lang:'en'
+				}
+			]
+			var users = yield wechatApi.fetchUsers(openIds);
+			//console.log('******users**********');
+			//console.log(users);
+			reply = JSON.stringify(user);
 		}
 		else if (content==='2') {
 			reply = '第二项';

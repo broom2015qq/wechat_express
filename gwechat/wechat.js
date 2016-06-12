@@ -5,7 +5,10 @@
 var Promise = require('bluebird');
 var tpl = require('./tpl');
 var util = require('./util');
+//判断是否为数组
+var util1 = require('util');
 var fs = require('fs');
+
 //request的then方法,是request promise化之后得到的
 var request = Promise.promisify(require('request'));
 var prefix = 'https://api.weixin.qq.com/cgi-bin/';
@@ -22,9 +25,13 @@ var api ={
         current:prefix+'get_current_selfmenu_info?'
 
     },
-    currentuser:{
-        get:prefix+'user/info?'
+    user:{
+        remark:prefix+'user/info/updateremark?',
+        fetch:prefix+'user/info?',
+        batchFetch:prefix+'user/info/batchget?'
+
     }
+
 }
 //构造函数,传入参数是票据
 function Wechat(opts){
@@ -65,6 +72,7 @@ Wechat.prototype.fetchAccessToken = function(data){
             return Promise.resolve(data);
         })
 }
+
 Wechat.prototype.fetchTicket = function(access_token){
     var that = this;
 
@@ -94,6 +102,8 @@ Wechat.prototype.fetchTicket = function(access_token){
             return Promise.resolve(data);
         })
 }
+
+
 Wechat.prototype.uploadMaterial = function(type,filepath){
     var that = this;
     var form ={
@@ -107,7 +117,7 @@ Wechat.prototype.uploadMaterial = function(type,filepath){
             .fetchAccessToken()
             .then(function(data){
                 var url = api.upload + 'access_token=' +data.access_token + '&type='+ type;
-                
+
                 //request发起请求,请求方法post
                 request({method:'POST',url:url, formData:form,json: true}).then(function(response) {
                     var _data = response.body;
@@ -141,6 +151,7 @@ Wechat.prototype.isValidAccessToken = function(data){
         return false;
     }
 }
+
 Wechat.prototype.isValidTicket = function(data){
     if(!data || !data.ticket || !data.expires_in){
         return false;
@@ -175,6 +186,7 @@ Wechat.prototype.updateAccessToken = function(){
     });
 
 }
+
 Wechat.prototype.updateTicket = function(access_token){
     var url =api.ticket.get+'&access_token='+access_token+'&type=jsapi';
     //发出请求
@@ -192,6 +204,7 @@ Wechat.prototype.updateTicket = function(access_token){
     });
 
 }
+
 //上下文已经改变,
 Wechat.prototype.reply = function(){
     //拿到回复的内容
@@ -204,6 +217,7 @@ Wechat.prototype.reply = function(){
     this.type = 'application/xml';
     this.body = xml;
 }
+
 Wechat.prototype.createMenu = function(menu){
     var that = this;
     return new Promise(function(resolve,reject){
@@ -227,6 +241,8 @@ Wechat.prototype.createMenu = function(menu){
     });
 
 }
+
+
 Wechat.prototype.getMenu = function(menu){
     var that = this;
     return new Promise(function(resolve,reject){
@@ -250,6 +266,7 @@ Wechat.prototype.getMenu = function(menu){
     });
 
 }
+
 Wechat.prototype.deleteMenu = function(){
     var that = this;
     return new Promise(function(resolve,reject){
@@ -296,33 +313,71 @@ Wechat.prototype.getCurrentMenu = function(){
     });
 
 }
-Wechat.prototype.fetchuser = function(access_token){
-    var that = this;
 
-    return this.getTicket()
-        .then(function(data){
-            try{
-                data = JSON.parse(data);
-            }
-                //获取不到,更新票据信息
-            catch(e){
-                //console.log('!!!!!access_token'+access_token)
-                return that.updateTicket(access_token);
-            }
-            if(that.isValidTicket(data)){
-                //把data传下去
-                return Promise.resolve(data);
-            }
-            else{
-                //如果票据过期
-                return that.updateTicket(access_token);
-            }
-        })
-        //拿到票据结果
-        .then(function(data){
-            //微信返回json数据包给公众号{"access_token":"ACCESS_TOKEN","expires_in":7200}
-            that.saveTicket(data);
-            return Promise.resolve(data);
-        })
+Wechat.prototype.remarkUser = function(openId,remark){
+    var that = this;
+    return new Promise(function(resolve,reject){
+        that
+            .fetchAccessToken()
+            .then(function(data){
+                var url = api.user.remark +'access_token='+data.access_token;
+                var form = {
+                    openid:openId,
+                    remark:remark
+                }
+
+                request({method:'POST',url :url,body:form, json: true}).then(function(response) {
+                    var _data = response.body;
+                    if(_data){
+                        resolve(_data);
+                    }
+                    else{
+                        throw new Error('Remark user fails');
+                    }
+
+                }).catch(function(err){
+                    reject(err);
+                })
+            })
+    });
+
+}
+Wechat.prototype.fetchUsers = function(openIds,lang){
+    var that = this;
+    lang = lang || 'zh_CN'
+    return new Promise(function(resolve,reject){
+        that
+            .fetchAccessToken()
+            .then(function(data){
+                var options = {
+                    json :true
+                }
+                //批量获取用户信息
+                if(util1.isArray(openIds)==true){
+                    options.url = api.user.batchFetch +'access_token='+data.access_token;
+                    options.body = {
+                        user_list:openIds
+                    }
+                    options.method = 'POST'
+                }
+                //获取单个用户信息
+                else{
+                    options.url = api.user.fetch +'access_token='+data.access_token+'&openid='+ openIds+'&lang='+lang;
+                }
+                request(options).then(function(response) {
+                    var _data = response.body;
+                    if(_data){
+                        resolve(_data);
+                    }
+                    else{
+                        throw new Error('Batch Fetch users fails');
+                    }
+
+                }).catch(function(err){
+                    reject(err);
+                })
+            })
+    });
+
 }
 module.exports = Wechat;
