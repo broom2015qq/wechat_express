@@ -73,6 +73,7 @@ exports.reply = function* (next){
 	}
 	//用户发的text
 	else if (message.MsgType==='text') {
+		var content = message.Content;
 		if(content === '1'){
 			var user = yield wechatApi.fetchUsers(message.FromUserName,'zh-CN');
 			//console.log('******user**********');
@@ -84,8 +85,8 @@ exports.reply = function* (next){
 				}
 			]
 			var users = yield wechatApi.fetchUsers(openIds);
-			//console.log('******users**********');
-			//console.log(users);
+			console.log('******users**********');
+			console.log(users);
 			reply = JSON.stringify(user);
 		}
 		else if (content==='2') {
