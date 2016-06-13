@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name ="viewport" content = "initial-scale=1,maximum-scale=1,minimum-scale=1">
+    <title>帮取页面</title>
+    <link rel="stylesheet" href="https://weui.io/weui.css"/>
+    <link rel="stylesheet" href="https://weui.io/example.css"/>
+</head>
+<body>
+<div class="container" id="container"><div class="cell">
+    <div class="hd">
+        <h1 class="page_title">快递帮帮取</h1>
+    </div>
+    <div class="bd">
+        <div class="weui_cells">
+            <div class="weui_cell">
+                <div class="weui_cell_hd"><img src="<%= img%>" alt="" style="width:20px;margin-right:5px;display:block"></div>
+                <div class="weui_cell_bd weui_cell_primary">
+                    <p><%= usrname%>的<%= company%>快递,手机号是<%= telephone%> </p>
+                </div>
+
+                <div class="weui_cell_ft"><%= address%></div>
+            </div>
+
+        </div>
+    </div>
+    <div class="weui_cells weui_cells_form">
+        <div class="weui_cell">
+            <div class="weui_cell_hd"><label class="weui_label">手机号</label></div>
+            <div class="weui_cell_bd weui_cell_primary">
+
+                <input class="weui_input" type="number" pattern="[0-9]*" placeholder="请输入手机号" id = "telephone"/>
+
+            </div>
+        </div>
+    </div>
+    <div class="weui_btn_area">
+        <a class="weui_btn weui_btn_primary" href="javascript:void(0);"  onclick="showDialog('dialog<%= id%>')"  id="showTooltips">确定</a>
+
+        <div class="weui_dialog_confirm" id="dialog<%= id%>" style="display: none;">
+            <div class="weui_mask"></div>
+            <div class="weui_dialog">
+                <div class="weui_dialog_hd">
+                    <strong class="weui_dialog_title">请求确认</strong>
+                </div>
+                <div class="weui_dialog_bd">
+                    <%= address %> <%= company %> <%= usrname %> <%= telephone %>
+                </div>
+                <div class="weui_dialog_ft">
+                    <a href="javascript:void(0);" onclick="javascript:hideDialog('dialog<%= id%>');" class="weui_btn_dialog default">取消</a>
+                    <a href="javascript:check(<%= id%>)" onclick="javascript:hideDialog('dialog<%= id%>');" class="weui_btn_dialog primary">确定</a>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+</div></div>
+
+<script type="text/javascript">
+    function showDialog(id) {
+        document.getElementById(id).style.display="block";
+    }
+    function hideDialog(id) {
+        document.getElementById(id).style.display="none";
+    }
+    function check(id) {
+        var mobile = document.getElementById("telephone").value;
+        console.log('hahahhahha'+mobile+'***********');
+        if(mobile.length==0)
+        {
+            alert('请输入手机号码！');
+            document.telephone.focus();
+            return false;
+        }
+        else if(mobile.length!=11)
+        {
+            alert('请输入有效的手机号码！');
+            document.telephone.focus();
+            return false;
+        }
+        else{
+            var s = '/receive/id=<%= id%>'
+            return s;
+
+        }
+
+    }
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

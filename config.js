@@ -5,8 +5,8 @@ var wechat_file=path.join(__dirname,'config/wechat.txt')
 var wechat_ticket_file=path.join(__dirname,'config/wechat_ticket.txt')
 var config ={
     wechat:{
-        appID:'wxf8af1ad692e84dbc',
-        appSecret:'36a8947ca101ca4f6af7e92f658693b6',
+        appID:'wx64ad8152dfd7c0e7',
+        appSecret:'703a9fd18c700ca77b9e7851fdec1750',
         token:'pkusunny',
         //获取票据
         getAccessToken:function(){

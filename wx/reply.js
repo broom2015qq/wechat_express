@@ -5,8 +5,9 @@ var menu = require('./menu');
 var path = require('path');
 var Promise = require('bluebird');
 var faceapi = require('../faceapi');
+var mysql_api = require('../mysql/express_sql');
 //数据库有关
-//var con = require('../config/config.js');
+var con = require('../config/config.js');
 var mysql= require('mysql');
 //var models = require('../models/model');
 //var User = models.User;
@@ -30,19 +31,13 @@ exports.reply = function* (next){
 			if (message.EventKey) {
 				console.log('扫二维码进来');
 			}
-			//this.body = '我的青春啊，全来学习nodejs了\r\n';
-			//console.log('我的青春啊，全来学习nodejs了');
-			reply = [{
-				title:'拍照',
-				description:'拍照',
-				picUrl:'http://static.open-open.com/news/uploadImg/20140123/20140123090127_450.png',
-				url:'http://www.cnblogs.com/thingk/archive/2013/11/25/3434032.html'
-			}]
-			this.body = reply;
+			this.body = '欢迎关注软微快递助手\r\n'+
+			'·回复 天天 顺丰 等快递名称,查询请求\n'+
+			'·也可以点击<a href="www.baidu.com">所有请求</a>查看所有列表';
 		}
 		else if (message.Event==='unsubscribe') {
-			this.body='无情取关';
-			console.log('无情取关');
+			//this.body='hello';
+			//console.log('无情取关');
 		}
 		else if (message.Event==='LOCATION') {
 			this.body='您上报的位置是 '+ message.Latitude+ '/'+ message.Longitude +'-'+message.Precision;
@@ -95,53 +90,40 @@ exports.reply = function* (next){
 		else if (content==='3') {
 			reply = '第三项';
 		}
-		else if (content==='4') {
-			reply = [{
-				title:'nodeJs学习过程之一个图片上传显示的例子',
-				description:'学习笔记',
-				picUrl:'http://static.open-open.com/news/uploadImg/20140123/20140123090127_450.png',
-				url:'http://www.cnblogs.com/thingk/archive/2013/11/25/3434032.html'
-			},{
-				title:'nodeJs学习过程之一个图片上传显示的例子',
-				description:'学习笔记',
-				picUrl:'http://static.open-open.com/news/uploadImg/20140123/20140123090127_450.png',
-				url:'http://www.cnblogs.com/thingk/archive/2013/11/25/3434032.html'
-			},{
-				title:'nodeJs学习过程之一个图片上传显示的例子',
-				description:'学习笔记',
-				picUrl:'http://static.open-open.com/news/uploadImg/20140123/20140123090127_450.png',
-				url:'http://www.cnblogs.com/thingk/archive/2013/11/25/3434032.html'
-			},{
-				title:'nodeJs学习过程之一个图片上传显示的例子',
-				description:'学习笔记',
-				picUrl:'http://static.open-open.com/news/uploadImg/20140123/20140123090127_450.png',
-				url:'http://www.cnblogs.com/thingk/archive/2013/11/25/3434032.html'
-			},{
-				title:'nodeJs学习过程之一个图片上传显示的例子',
-				description:'学习笔记',
-				picUrl:'http://static.open-open.com/news/uploadImg/20140123/20140123090127_450.png',
-				url:'http://www.cnblogs.com/thingk/archive/2013/11/25/3434032.html'
-			},{
-				title:'nodeJs学习过程之一个图片上传显示的例子',
-				description:'学习笔记',
-				picUrl:'http://static.open-open.com/news/uploadImg/20140123/20140123090127_450.png',
-				url:'http://www.cnblogs.com/thingk/archive/2013/11/25/3434032.html'
-			},{
-				title:'nodeJs学习过程之一个图片上传显示的例子',
-				description:'学习笔记',
-				picUrl:'http://static.open-open.com/news/uploadImg/20140123/20140123090127_450.png',
-				url:'http://www.cnblogs.com/thingk/archive/2013/11/25/3434032.html'
-			},{
-				title:'nodeJs学习过程之一个图片上传显示的例子',
-				description:'学习笔记',
-				picUrl:'http://static.open-open.com/news/uploadImg/20140123/20140123090127_450.png',
-				url:'http://www.cnblogs.com/thingk/archive/2013/11/25/3434032.html'
-			},{
-				title:'nodeJs学习过程之一个图片上传显示的例子',
-				description:'学习笔记',
-				picUrl:'http://static.open-open.com/news/uploadImg/20140123/20140123090127_450.png',
-				url:'http://www.cnblogs.com/thingk/archive/2013/11/25/3434032.html'
-			}]
+		else if (content==='顺丰'||content==='天天'||content==='韵达'||content==='中通'||content==='圆通') {
+			var pic='';
+			if(content==='顺丰'){
+				pic = 'http://d7.yihaodianimg.com/N05/M02/B8/B1/ChEbulTTAuGAPNhwAAC2knk3Fcg83300_360x360.jpg'
+			}else if(content==='天天'){
+				pic='http://pic3.58cdn.com.cn/p2/big/n_s12240046097467236076.jpg'
+			}
+			else if(content==='韵达'){
+				pic='http://pic.qiantucdn.com/58pic/18/20/38/02G58PICWSs_1024.jpg'
+			}
+			else if(content==='中通'){
+				pic='http://www.downhot.com/guanli/UploadFile/2016-1/20161259521182282.jpg'
+			}
+			else if(content==='圆通'){
+				pic='http://a1423.phobos.apple.com/us/r1000/115/Purple/v4/fa/30/21/fa3021c4-b469-e369-37c5-8c5e031c618c/mzl.bsfxypfp.png'
+			}
+			var searchresult = yield mysql_api(content);
+			//console.log('searchresult.length**********'+searchresult.length);
+			if(searchresult && searchresult.length >0){
+				reply=[];
+				for(var i = 0;i<searchresult.length;i++){
+					reply.push({
+						title:searchresult[i].address,
+						description:searchresult[i].req_ID,
+						picUrl:pic ,
+						url:'http://123.206.74.28:1234/list' +
+						'?res_ID='+message.FromUserName+'&id='+searchresult[i].id+'&reqid='+searchresult[i].req_ID
+
+					})
+				}
+			}
+			else if(searchresult.length===0){
+				reply = '还木有'+content+'的信息';
+			}
 		}
 		else if (content==='5') {
 			var data =yield wechatApi.uploadMaterial('image',path.join(__dirname,'../2.jpg'));
@@ -160,6 +142,10 @@ exports.reply = function* (next){
 				mediaId: data.media_id
 			}
 		}
+		else{
+			reply ='发发别的试试'
+		}
+
 
 		this.body = reply;
 
@@ -199,6 +185,46 @@ exports.reply = function* (next){
 		//}
 		this.body = reply;
 
+	}
+	else if (message.MsgType==='voice'){
+		var voiceText = message.Recognition;
+
+		var voiceText = voiceText.match(/[^，。？!！]+(?=[，。？!！])/g);
+		voiceText=voiceText+'';
+		var vpic='';
+		if(voiceText==='顺丰'){
+			vpic = 'http://d7.yihaodianimg.com/N05/M02/B8/B1/ChEbulTTAuGAPNhwAAC2knk3Fcg83300_360x360.jpg'
+		}else if(voiceText==='天天'){
+			vpic='http://pic3.58cdn.com.cn/p2/big/n_s12240046097467236076.jpg'
+		}
+		else if(voiceText==='韵达'){
+			vpic='http://pic.qiantucdn.com/58pic/18/20/38/02G58PICWSs_1024.jpg'
+		}
+		else if(voiceText==='中通'){
+			vpic='http://www.downhot.com/guanli/UploadFile/2016-1/20161259521182282.jpg'
+		}
+		else if(voiceText==='圆通'){
+			vpic='http://a1423.phobos.apple.com/us/r1000/115/Purple/v4/fa/30/21/fa3021c4-b469-e369-37c5-8c5e031c618c/mzl.bsfxypfp.png'
+		}
+		console.log('vpic****************'+vpic);
+		var searchresult = yield mysql_api(voiceText);
+
+		if(searchresult && searchresult.length >0){
+			reply=[];
+			for(var i = 0;i<searchresult.length;i++){
+				reply.push({
+					//先看看住位置要不要取
+					title:searchresult[i].address,
+					description:searchresult[i].req_ID,
+					picUrl:vpic,
+					url:'http://123.206.74.28:1234/list?res_ID='+message.FromUserName+'&id='+searchresult[i].id+'&reqid='+searchresult[i].req_ID
+				});
+			}
+		}
+		else if(searchresult.length===0){
+			reply = '还木有'+voiceText+'的信息';
+		}
+		this.body = reply;
 	}
 
 	yield next;

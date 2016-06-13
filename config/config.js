@@ -6,10 +6,10 @@ var mysql = require('mysql');
 function connectServer(){
     var pool = mysql.createPool({
         connectionLimit: 10,
-        host: 'localhost',
-        user: 'myNote',
-        password: '123',
-        database: 'myNote'
+        host: '120.27.123.90',
+        user: 'sunqing',
+        password: 'sunqing',
+        database: 'express'
     });
     return pool;
 }

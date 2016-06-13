@@ -4,7 +4,7 @@
 'use strict'
 var ejs = require('ejs');
 var heredoc = require('heredoc');
-//传进来的是congtent
+//传进来的是content
 var tpl = heredoc(function(){/*
 	<xml>
 	<ToUserName><![CDATA[<%= toUserName %>]]></ToUserName>
@@ -12,7 +12,7 @@ var tpl = heredoc(function(){/*
 	<CreateTime><% createTime %></CreateTime>
 	<MsgType><![CDATA[<%= MsgType %>]]></MsgType>
 	<% if(MsgType === 'text'){ %>
-		<Content><![CDATA[<%= content %>]]></Content>
+		<Content><![CDATA[<%- content %>]]></Content>
 	<% }else if(MsgType === 'image'){ %>
 		<Image>
 		<MediaId><![CDATA[<%= content.mediaId %>]]></MediaId>

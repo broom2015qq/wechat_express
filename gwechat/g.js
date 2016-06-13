@@ -49,7 +49,6 @@ module.exports = function(opts,handler){
             console.log(content);
             var message = util.formatMessage(content.xml);
             console.log(message.PicUrl);
-            
             this.weixin = message;
             //走向外层逻辑,改变上下文
             yield handler.call(this,next);
