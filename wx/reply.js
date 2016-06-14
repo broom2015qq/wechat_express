@@ -109,6 +109,7 @@ exports.reply = function* (next){
 			var searchresult = yield mysql_api(content);
 			//console.log('searchresult.length**********'+searchresult.length);
 			if(searchresult && searchresult.length >0){
+				var count = searchresult.length>5?5:searchresult.length;
 				reply=[];
 				for(var i = 0;i<searchresult.length;i++){
 					reply.push({
